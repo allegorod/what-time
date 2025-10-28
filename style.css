@@ -9,8 +9,8 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     display: flex;
-    flex-direction: column;  /* ← ДОБАВИЛ ЭТО */
-    padding: 0;              /* ← ИЗМЕНИЛ С 20px НА 0 */
+    flex-direction: column;
+    padding: 0;
 }
 
 .container {
@@ -20,11 +20,11 @@ body {
     max-width: 500px;
     width: 100%;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    margin: 20px auto;       /* ← ДОБАВИЛ ЭТО */
-    flex: 1;                 /* ← ДОБАВИЛ ЭТО */
-    display: flex;           /* ← ДОБАВИЛ ЭТО */
-    flex-direction: column;  /* ← ДОБАВИЛ ЭТО */
-    justify-content: center; /* ← ДОБАВИЛ ЭТО */
+    margin: 20px auto;
+    min-height: calc(100vh - 40px);  /* ← ДОБАВЬ ЭТО - занимает весь экран минус отступы */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 h1 {
