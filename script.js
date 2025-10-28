@@ -254,13 +254,13 @@ document.addEventListener('DOMContentLoaded', function() {
         '925': { name: 'California', offset: -8 },
         '949': { name: 'Orange County', offset: -8 },
         '951': { name: 'California', offset: -8 },
-        '971': { name: 'Oregon', offset: -8 }
+        '971': { name: 'Oregon', offset: -8 },
         '506': { name: 'New Brunswick', offset: -4 },  // ← Вот этот!
         '613': { name: 'Ottawa', offset: -5 },
         '705': { name: 'Ontario', offset: -5 },
         '807': { name: 'Ontario', offset: -5 },
         '902': { name: 'Nova Scotia', offset: -4 },
-        '709': { name: 'Newfoundland', offset: -3.5 },
+        '709': { name: 'Newfoundland', offset: -3.5 }
     };
 
     function parseUTCOffset(utcString) {
