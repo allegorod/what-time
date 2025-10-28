@@ -141,3 +141,39 @@ h1 {
 .result:last-child {
     margin-bottom: 0;
 }
+
+/* SEO Footer */
+.seo-footer {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.seo-footer h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.seo-footer p {
+    margin-bottom: 15px;
+}
+
+.seo-footer .footer-links {
+    margin-top: 20px;
+}
+
+.seo-footer a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.seo-footer a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
