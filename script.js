@@ -10,8 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     phoneInput.value = '+';
-    let lastSuccessfulResult = null;
+    let lastSuccessfulResult = null; // Сохраняем последний успешный результат
 
+    // Карта area code к названиям регионов (та же что была)
     const areaCodeRegions = {
         '201': { name: 'New Jersey', offset: -5 },
         '202': { name: 'Washington DC', offset: -5 },
@@ -278,79 +279,34 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${hours}:${minutes}`;
     }
 
-function findMatchingCountries(digits) {
-    const matches = [];
-    
-    // Специальная обработка для номеров начинающихся с '1'
-    if (digits.startsWith('1')) {
-        if (digits.length === 1) {
-            matches.push({
-                country: 'USA / Canada',
-                flag: '🇺🇸🇨🇦',
-                hint: 'Input 3 more digits for area code',
-                matchedCode: '1',
-                priority: 0
-            });
-            
-            for (const code in phoneDatabase) {
-                if (code.startsWith('1') && code !== '1') {
-                    phoneDatabase[code].forEach(country => {
+    function findMatchingCountries(digits) {
+        const matches = [];
+        
+        // Специальная обработка для +1 (США/Канада)
+        if (digits.startsWith('1')) {
+            if (digits.length === 1) {
+                matches.push({
+                    country: 'USA / Canada',
+                    flag: '🇺🇸🇨🇦',
+                    hint: 'Input 3 more digits for area code',
+                    matchedCode: '1'
+                });
+            } else if (digits.length >= 2 && digits.length <= 4) {
+                const areaPrefix = digits.substring(1);
+                for (const areaCode in areaCodeRegions) {
+                    if (areaCode.startsWith(areaPrefix)) {
+                        const region = areaCodeRegions[areaCode];
                         matches.push({
-                            ...country,
-                            matchedCode: code,
-                            codeLength: code.length,
-                            priority: 1
+                            country: region.name,
+                            flag: '📍',
+                            time: getCurrentTime(region.offset),
+                            timezone: region.offset >= 0 ? `UTC+${region.offset}` : `UTC${region.offset}`,
+                            matchedCode: '1' + areaCode
                         });
-                    });
+                    }
                 }
-            }
-        } 
-        else if (digits.length >= 2 && digits.length <= 4) {
-            for (const code in phoneDatabase) {
-                if (code.startsWith(digits) && code !== '1') {
-                    phoneDatabase[code].forEach(country => {
-                        matches.push({
-                            ...country,
-                            matchedCode: code,
-                            codeLength: code.length,
-                            priority: 0
-                        });
-                    });
-                }
-            }
-            
-            const areaPrefix = digits.substring(1);
-            for (const areaCode in areaCodeRegions) {
-                if (areaCode.startsWith(areaPrefix)) {
-                    const region = areaCodeRegions[areaCode];
-                    matches.push({
-                        country: region.name,
-                        flag: '📍',
-                        time: getCurrentTime(region.offset),
-                        timezone: region.offset >= 0 ? `UTC+${region.offset}` : `UTC${region.offset}`,
-                        matchedCode: '1' + areaCode,
-                        priority: 1
-                    });
-                }
-            }
-        } 
-        else if (digits.length > 4) {
-            let foundExact = false;
-            for (const code in phoneDatabase) {
-                if (digits.startsWith(code) && code.length === 4 && code !== '1') {
-                    phoneDatabase[code].forEach(country => {
-                        matches.push({
-                            ...country,
-                            matchedCode: code,
-                            codeLength: code.length
-                        });
-                    });
-                    foundExact = true;
-                    break;
-                }
-            }
-            
-            if (!foundExact) {
+            } else if (digits.length > 4) {
+                // Полный номер - берем area code и показываем результат
                 const areaCode = digits.substring(1, 4);
                 const region = areaCodeRegions[areaCode];
                 if (region) {
@@ -363,83 +319,35 @@ function findMatchingCountries(digits) {
                     });
                 }
             }
+            return matches;
         }
         
-        matches.sort((a, b) => (a.priority || 0) - (b.priority || 0));
-        return matches;
-    }
-    
-    else if (digits.startsWith('7')) {
-        if (digits.length === 1) {
-            matches.push({
-                country: 'Russia',
-                flag: '🇷🇺',
-                timezones: ['UTC+2', 'UTC+3', 'UTC+4', 'UTC+5', 'UTC+6', 'UTC+7', 'UTC+8', 'UTC+9', 'UTC+10', 'UTC+11', 'UTC+12'],
-                matchedCode: '7'
-            });
-            matches.push({
-                country: 'Kazakhstan',
-                flag: '🇰🇿',
-                timezones: ['UTC+5', 'UTC+6'],
-                matchedCode: '76, 77'
-            });
-            matches.push({
-                country: 'Abkhazia',
-                flag: '🇦🇧',
-                timezones: ['UTC+3'],
-                matchedCode: '784, 794'
-            });
-        } else {
-            if (digits.startsWith('76') || digits.startsWith('77')) {
-                matches.push({
-                    country: 'Kazakhstan',
-                    flag: '🇰🇿',
-                    timezones: ['UTC+5', 'UTC+6'],
-                    matchedCode: digits.startsWith('76') ? '76' : '77'
-                });
-            }
-            else if (digits.startsWith('784') || digits.startsWith('794')) {
-                matches.push({
-                    country: 'Abkhazia',
-                    flag: '🇦🇧',
-                    timezones: ['UTC+3'],
-                    matchedCode: digits.startsWith('784') ? '784' : '794'
-                });
-            }
-            else {
-                matches.push({
-                    country: 'Russia',
-                    flag: '🇷🇺',
-                    timezones: ['UTC+2', 'UTC+3', 'UTC+4', 'UTC+5', 'UTC+6', 'UTC+7', 'UTC+8', 'UTC+9', 'UTC+10', 'UTC+11', 'UTC+12'],
-                    matchedCode: '7'
-                });
-            }
-        }
-        
-        return matches;
-    }
-    
-    else {
+        // Для остальных стран - ищем самое длинное совпадение
+        let bestMatch = null;
         for (const code in phoneDatabase) {
-            if (code.startsWith(digits)) {
-                phoneDatabase[code].forEach(country => {
-                    matches.push({
-                        ...country,
-                        matchedCode: code,
-                        codeLength: code.length
-                    });
-                });
+            if (digits.startsWith(code)) {
+                if (!bestMatch || code.length > bestMatch.length) {
+                    bestMatch = code;
+                }
             }
         }
         
-        matches.sort((a, b) => a.codeLength - b.codeLength);
+        if (bestMatch) {
+            phoneDatabase[bestMatch].forEach(country => {
+                matches.push({
+                    ...country,
+                    matchedCode: bestMatch,
+                    codeLength: bestMatch.length
+                });
+            });
+        }
+        
+        return matches;
     }
-    
-    return matches;
-}
 
     function displayResults(countries) {
         if (countries.length === 0) {
+            // Если нет результата, но был успешный ранее - показываем его
             if (lastSuccessfulResult) {
                 resultsDiv.innerHTML = lastSuccessfulResult;
                 errorDiv.classList.add('hidden');
@@ -499,7 +407,7 @@ function findMatchingCountries(digits) {
         });
         
         resultsDiv.innerHTML = html;
-        lastSuccessfulResult = html;
+        lastSuccessfulResult = html; // Сохраняем успешный результат
     }
 
     phoneInput.addEventListener('focus', function() {
