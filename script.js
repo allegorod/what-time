@@ -70,7 +70,6 @@ function getLocalTime(countryCode) {
 }
 
 phoneInput.addEventListener('focus', function() {
-    // Курсор в конец после +
     if (phoneInput.value === '+') {
         setTimeout(() => {
             phoneInput.setSelectionRange(1, 1);
@@ -79,7 +78,6 @@ phoneInput.addEventListener('focus', function() {
 });
 
 phoneInput.addEventListener('keydown', function(e) {
-    // Запрещаем удаление +
     if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.value === '+') {
         e.preventDefault();
     }
@@ -88,13 +86,11 @@ phoneInput.addEventListener('keydown', function(e) {
 phoneInput.addEventListener('input', function(e) {
     let value = e.target.value;
     
-    // Всегда оставляем + в начале
     if (!value.startsWith('+')) {
         value = '+' + value.replace(/\+/g, '');
         phoneInput.value = value;
     }
     
-    // Если только +, скрываем результаты
     if (value === '+') {
         result.classList.add('hidden');
         errorDiv.classList.add('hidden');
@@ -102,7 +98,8 @@ phoneInput.addEventListener('input', function(e) {
     }
     
     try {
-        const phoneNumber = libphonenumber.parsePhoneNumber(value);
+        // ВАЖНО: используем window.libphonenumber или просто libphonenumber
+        const phoneNumber = window.libphonenumber.parsePhoneNumber(value);
         
         if (phoneNumber && phoneNumber.country) {
             const countryCode = phoneNumber.country;
