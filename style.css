@@ -10,21 +10,20 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    padding: 0;
+    align-items: center;      /* ← ДОБАВИЛ */
+    justify-content: flex-start;  /* ← ДОБАВИЛ */
+    padding: 20px 0;          /* ← ИЗМЕНИЛ */
 }
+
 
 .container {
     background: white;
     border-radius: 20px;
     padding: 40px;
     max-width: 500px;
-    width: 100%;
+    width: calc(100% - 40px);
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    margin: 20px auto;
-    min-height: calc(100vh - 40px);  /* ← ДОБАВЬ ЭТО - занимает весь экран минус отступы */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    margin: 20px;
 }
 
 h1 {
