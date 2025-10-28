@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     phoneInput.value = '+';
+    let lastSuccessfulResult = null; // Сохраняем последний успешный результат
 
-    // Карта area code к названиям регионов
+    // Карта area code к названиям регионов (та же что была)
     const areaCodeRegions = {
-        // Eastern (UTC-5)
         '201': { name: 'New Jersey', offset: -5 },
         '202': { name: 'Washington DC', offset: -5 },
         '203': { name: 'Connecticut', offset: -5 },
@@ -111,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
         '978': { name: 'Massachusetts', offset: -5 },
         '980': { name: 'North Carolina', offset: -5 },
         '989': { name: 'Michigan', offset: -5 },
-        // Central (UTC-6)
         '204': { name: 'Manitoba', offset: -6 },
         '205': { name: 'Alabama', offset: -6 },
         '210': { name: 'San Antonio', offset: -6 },
@@ -197,7 +196,6 @@ document.addEventListener('DOMContentLoaded', function() {
         '972': { name: 'Dallas', offset: -6 },
         '979': { name: 'Texas', offset: -6 },
         '985': { name: 'Louisiana', offset: -6 },
-        // Mountain (UTC-7)
         '303': { name: 'Denver', offset: -7 },
         '307': { name: 'Wyoming', offset: -7 },
         '385': { name: 'Utah', offset: -7 },
@@ -217,7 +215,6 @@ document.addEventListener('DOMContentLoaded', function() {
         '587': { name: 'Alberta', offset: -7 },
         '780': { name: 'Edmonton', offset: -7 },
         '825': { name: 'Alberta', offset: -7 },
-        // Pacific (UTC-8)
         '206': { name: 'Seattle', offset: -8 },
         '209': { name: 'California', offset: -8 },
         '213': { name: 'Los Angeles', offset: -8 },
@@ -288,7 +285,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Специальная обработка для +1 (США/Канада)
         if (digits.startsWith('1')) {
             if (digits.length === 1) {
-                // Только +1 - показываем страны с подсказкой
                 matches.push({
                     country: 'USA / Canada',
                     flag: '🇺🇸🇨🇦',
@@ -296,7 +292,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     matchedCode: '1'
                 });
             } else if (digits.length >= 2 && digits.length <= 4) {
-                // +1X, +1XX, +1XXX - показываем все подходящие area code
                 const areaPrefix = digits.substring(1);
                 for (const areaCode in areaCodeRegions) {
                     if (areaCode.startsWith(areaPrefix)) {
@@ -311,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } else if (digits.length > 4) {
-                // Полный номер - точное совпадение area code
+                // Полный номер - берем area code и показываем результат
                 const areaCode = digits.substring(1, 4);
                 const region = areaCodeRegions[areaCode];
                 if (region) {
@@ -327,26 +322,38 @@ document.addEventListener('DOMContentLoaded', function() {
             return matches;
         }
         
-        // Для остальных стран - обычная логика префикса
+        // Для остальных стран - ищем самое длинное совпадение
+        let bestMatch = null;
         for (const code in phoneDatabase) {
-            if (code.startsWith(digits)) {
-                phoneDatabase[code].forEach(country => {
-                    matches.push({
-                        ...country,
-                        matchedCode: code,
-                        codeLength: code.length
-                    });
-                });
+            if (digits.startsWith(code)) {
+                if (!bestMatch || code.length > bestMatch.length) {
+                    bestMatch = code;
+                }
             }
         }
         
-        matches.sort((a, b) => (a.codeLength || 0) - (b.codeLength || 0));
+        if (bestMatch) {
+            phoneDatabase[bestMatch].forEach(country => {
+                matches.push({
+                    ...country,
+                    matchedCode: bestMatch,
+                    codeLength: bestMatch.length
+                });
+            });
+        }
         
         return matches;
     }
 
     function displayResults(countries) {
         if (countries.length === 0) {
+            // Если нет результата, но был успешный ранее - показываем его
+            if (lastSuccessfulResult) {
+                resultsDiv.innerHTML = lastSuccessfulResult;
+                errorDiv.classList.add('hidden');
+                return;
+            }
+            
             resultsDiv.innerHTML = '';
             errorDiv.textContent = 'Could not determine country by number';
             errorDiv.classList.remove('hidden');
@@ -358,7 +365,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let html = '';
         countries.forEach(country => {
             if (country.hint) {
-                // Подсказка для +1
                 html += `
                     <div class="result">
                         <div class="flag">${country.flag}</div>
@@ -369,7 +375,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
             } else if (country.time) {
-                // Area code результат
                 html += `
                     <div class="result">
                         <div class="flag">${country.flag}</div>
@@ -381,7 +386,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
             } else {
-                // Обычные страны
                 const times = country.timezones.map(tz => {
                     const offset = parseUTCOffset(tz);
                     return getCurrentTime(offset);
@@ -403,6 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         resultsDiv.innerHTML = html;
+        lastSuccessfulResult = html; // Сохраняем успешный результат
     }
 
     phoneInput.addEventListener('focus', function() {
@@ -430,6 +435,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (digits.length === 0) {
             resultsDiv.innerHTML = '';
             errorDiv.classList.add('hidden');
+            lastSuccessfulResult = null;
             return;
         }
         
