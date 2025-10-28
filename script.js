@@ -82,7 +82,7 @@ const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
 function getLocalTimeFromTimezone(tzName) {
     try {
         const now = new Date();
-        const formatter = new Intl.DateTimeFormat('en-US', {
+        const formatter = new Intl.DateTimeFormat('ru-RU', {
             timeZone: tzName,
             hour: '2-digit',
             minute: '2-digit',
@@ -95,10 +95,16 @@ function getLocalTimeFromTimezone(tzName) {
             time: timeString,
             timezone: tzName.split('/').pop().replace(/_/g, ' ')
         };
-    } catch (err) {
+    } catch (e) {
         return null;
     }
 }
+
+phoneInput.addEventListener('focus', function() {
+    if (phoneInput.value === '+') {
+        setTimeout(() => phoneInput.setSelectionRange(1, 1), 0);
+    }
+});
 
 phoneInput.addEventListener('keydown', function(e) {
     if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.value === '+') {
@@ -123,13 +129,12 @@ phoneInput.addEventListener('input', function(e) {
     try {
         const phoneNumber = phoneUtil.parse(value);
         const regionCode = phoneUtil.getRegionCodeForNumber(phoneNumber);
-
+        
         if (regionCode) {
             const flag = countryFlags[regionCode] || '🌍';
             const country = countryNames[regionCode] || regionCode;
             
             const timezones = countryTimezones[regionCode] || ['UTC'];
-            const timezoneData = getLocalTimeFromTimezone(timezones[0]);
             
             if (timezones.length > 1) {
                 const timeRanges = timezones.map(tz => {
@@ -144,6 +149,7 @@ phoneInput.addEventListener('input', function(e) {
                 timeDiv.textContent = uniqueTimes.join(' - ');
                 timezoneDiv.textContent = uniqueTimes.length > 1 ? 'Multiple timezones - enter more digits' : timezones[0].split('/').pop().replace(/_/g, ' ');
             } else {
+                const timezoneData = getLocalTimeFromTimezone(timezones[0]);
                 flagDiv.textContent = flag;
                 countryDiv.textContent = country;
                 timeDiv.textContent = timezoneData.time;
