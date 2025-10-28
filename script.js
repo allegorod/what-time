@@ -27,7 +27,7 @@ const countryFlags = {
     'ZW': '🇿🇼', 'BW': '🇧🇼', 'NA': '🇳🇦', 'MU': '🇲🇺', 'RE': '🇷🇪', 'MG': '🇲🇬'
 };
 
-    const countryNames = {
+const countryNames = {
     'RU': 'Russia', 'US': 'USA', 'GB': 'United Kingdom', 'DE': 'Germany', 'FR': 'France',
     'IT': 'Italy', 'ES': 'Spain', 'UA': 'Ukraine', 'BY': 'Belarus', 'KZ': 'Kazakhstan',
     'CN': 'China', 'JP': 'Japan', 'KR': 'South Korea', 'IN': 'India', 'BR': 'Brazil',
@@ -75,7 +75,6 @@ const countryTimezones = {
     'NL': ['Europe/Amsterdam']
 };
 
-
 phoneInput.value = '+';
 
 const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
@@ -83,7 +82,7 @@ const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
 function getLocalTimeFromTimezone(tzName) {
     try {
         const now = new Date();
-        const formatter = new Intl.DateTimeFormat('ru-RU', {
+        const formatter = new Intl.DateTimeFormat('en-US', {
             timeZone: tzName,
             hour: '2-digit',
             minute: '2-digit',
@@ -96,16 +95,10 @@ function getLocalTimeFromTimezone(tzName) {
             time: timeString,
             timezone: tzName.split('/').pop().replace(/_/g, ' ')
         };
-} catch (err) {
-    if (value.length > 1) {
-        errorDiv.textContent = 'Could not determine country by number';
-        errorDiv.classList.remove('hidden');
-        result.classList.add('hidden');
-    } else {
-        errorDiv.classList.add('hidden');
-        result.classList.add('hidden');
+    } catch (err) {
+        return null;
     }
-});
+}
 
 phoneInput.addEventListener('keydown', function(e) {
     if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.value === '+') {
@@ -132,31 +125,42 @@ phoneInput.addEventListener('input', function(e) {
         const regionCode = phoneUtil.getRegionCodeForNumber(phoneNumber);
 
         if (regionCode) {
-    const flag = countryFlags[regionCode] || '🌍';
-    const country = countryNames[regionCode] || regionCode;
-    
-    const timezones = countryTimezones[regionCode] || ['UTC'];
-    const timezoneData = getLocalTimeFromTimezone(timezones[0]);
-    
-    if (timezones.length > 1) {
-        const timeRanges = timezones.map(tz => {
-            const data = getLocalTimeFromTimezone(tz);
-            return data ? data.time : '';
-        }).filter(t => t);
-        
-        const uniqueTimes = [...new Set(timeRanges)];
-        
-        flagDiv.textContent = flag;
-        countryDiv.textContent = country;
-        timeDiv.textContent = uniqueTimes.join(' - ');
-        timezoneDiv.textContent = uniqueTimes.length > 1 ? 'Multiple timezones - enter more digits' : timezones[0].split('/').pop().replace(/_/g, ' ');
-    } else {
-        flagDiv.textContent = flag;
-        countryDiv.textContent = country;
-        timeDiv.textContent = timezoneData.time;
-        timezoneDiv.textContent = timezoneData.timezone;
+            const flag = countryFlags[regionCode] || '🌍';
+            const country = countryNames[regionCode] || regionCode;
+            
+            const timezones = countryTimezones[regionCode] || ['UTC'];
+            const timezoneData = getLocalTimeFromTimezone(timezones[0]);
+            
+            if (timezones.length > 1) {
+                const timeRanges = timezones.map(tz => {
+                    const data = getLocalTimeFromTimezone(tz);
+                    return data ? data.time : '';
+                }).filter(t => t);
+                
+                const uniqueTimes = [...new Set(timeRanges)];
+                
+                flagDiv.textContent = flag;
+                countryDiv.textContent = country;
+                timeDiv.textContent = uniqueTimes.join(' - ');
+                timezoneDiv.textContent = uniqueTimes.length > 1 ? 'Multiple timezones - enter more digits' : timezones[0].split('/').pop().replace(/_/g, ' ');
+            } else {
+                flagDiv.textContent = flag;
+                countryDiv.textContent = country;
+                timeDiv.textContent = timezoneData.time;
+                timezoneDiv.textContent = timezoneData.timezone;
+            }
+            
+            result.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+        }
+    } catch (err) {
+        if (value.length > 1) {
+            errorDiv.textContent = 'Could not determine country by number';
+            errorDiv.classList.remove('hidden');
+            result.classList.add('hidden');
+        } else {
+            errorDiv.classList.add('hidden');
+            result.classList.add('hidden');
+        }
     }
-    
-    result.classList.remove('hidden');
-    errorDiv.classList.add('hidden');
 });
