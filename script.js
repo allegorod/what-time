@@ -1,157 +1,247 @@
-document.addEventListener('DOMContentLoaded', function() {
-    
-    const phoneInput = document.getElementById('phoneInput');
-    const resultsDiv = document.getElementById('results');
-    const errorDiv = document.getElementById('error');
-    
-    if (!phoneInput || !resultsDiv || !errorDiv) {
-        console.error('Not all DOM elements found');
-        return;
-    }
+// Полная база телефонных кодов всех стран мира с timezone
+const phoneDatabase = {
+    '1': [
+        { country: 'USA', flag: '🇺🇸', timezones: ['UTC-10', 'UTC-9', 'UTC-8', 'UTC-7', 'UTC-6', 'UTC-5'], hasAreaCodes: true },
+        { country: 'Canada', flag: '🇨🇦', timezones: ['UTC-8', 'UTC-7', 'UTC-6', 'UTC-5', 'UTC-4', 'UTC-3:30'], hasAreaCodes: true }
+    ],
+    '7': [
+        { country: 'Russia', flag: '🇷🇺', timezones: ['UTC+2', 'UTC+3', 'UTC+4', 'UTC+5', 'UTC+6', 'UTC+7', 'UTC+8', 'UTC+9', 'UTC+10', 'UTC+11', 'UTC+12'] },
+        { country: 'Kazakhstan', flag: '🇰🇿', timezones: ['UTC+5', 'UTC+6'] }
+    ],
+    '20': [{ country: 'Egypt', flag: '🇪🇬', timezones: ['UTC+2'] }],
+    '27': [{ country: 'South Africa', flag: '🇿🇦', timezones: ['UTC+2'] }],
+    '30': [{ country: 'Greece', flag: '🇬🇷', timezones: ['UTC+2'] }],
+    '31': [{ country: 'Netherlands', flag: '🇳🇱', timezones: ['UTC+1'] }],
+    '32': [{ country: 'Belgium', flag: '🇧🇪', timezones: ['UTC+1'] }],
+    '33': [{ country: 'France', flag: '🇫🇷', timezones: ['UTC+1'] }],
+    '34': [{ country: 'Spain', flag: '🇪🇸', timezones: ['UTC+1'] }],
+    '36': [{ country: 'Hungary', flag: '🇭🇺', timezones: ['UTC+1'] }],
+    '39': [{ country: 'Italy', flag: '🇮🇹', timezones: ['UTC+1'] }],
+    '40': [{ country: 'Romania', flag: '🇷🇴', timezones: ['UTC+2'] }],
+    '41': [{ country: 'Switzerland', flag: '🇨🇭', timezones: ['UTC+1'] }],
+    '43': [{ country: 'Austria', flag: '🇦🇹', timezones: ['UTC+1'] }],
+    '44': [{ country: 'United Kingdom', flag: '🇬🇧', timezones: ['UTC+0'] }],
+    '45': [{ country: 'Denmark', flag: '🇩🇰', timezones: ['UTC+1'] }],
+    '46': [{ country: 'Sweden', flag: '🇸🇪', timezones: ['UTC+1'] }],
+    '47': [{ country: 'Norway', flag: '🇳🇴', timezones: ['UTC+1'] }],
+    '48': [{ country: 'Poland', flag: '🇵🇱', timezones: ['UTC+1'] }],
+    '49': [{ country: 'Germany', flag: '🇩🇪', timezones: ['UTC+1'] }],
+    '51': [{ country: 'Peru', flag: '🇵🇪', timezones: ['UTC-5'] }],
+    '52': [{ country: 'Mexico', flag: '🇲🇽', timezones: ['UTC-8', 'UTC-7', 'UTC-6'] }],
+    '53': [{ country: 'Cuba', flag: '🇨🇺', timezones: ['UTC-5'] }],
+    '54': [{ country: 'Argentina', flag: '🇦🇷', timezones: ['UTC-3'] }],
+    '55': [{ country: 'Brazil', flag: '🇧🇷', timezones: ['UTC-5', 'UTC-4', 'UTC-3', 'UTC-2'] }],
+    '56': [{ country: 'Chile', flag: '🇨🇱', timezones: ['UTC-6', 'UTC-5', 'UTC-4', 'UTC-3'] }],
+    '57': [{ country: 'Colombia', flag: '🇨🇴', timezones: ['UTC-5'] }],
+    '58': [{ country: 'Venezuela', flag: '🇻🇪', timezones: ['UTC-4'] }],
+    '60': [{ country: 'Malaysia', flag: '🇲🇾', timezones: ['UTC+8'] }],
+    '61': [{ country: 'Australia', flag: '🇦🇺', timezones: ['UTC+8', 'UTC+9', 'UTC+9:30', 'UTC+10', 'UTC+10:30'] }],
+    '62': [{ country: 'Indonesia', flag: '🇮🇩', timezones: ['UTC+7', 'UTC+8', 'UTC+9'] }],
+    '63': [{ country: 'Philippines', flag: '🇵🇭', timezones: ['UTC+8'] }],
+    '64': [{ country: 'New Zealand', flag: '🇳🇿', timezones: ['UTC+12'] }],
+    '65': [{ country: 'Singapore', flag: '🇸🇬', timezones: ['UTC+8'] }],
+    '66': [{ country: 'Thailand', flag: '🇹🇭', timezones: ['UTC+7'] }],
+    '81': [{ country: 'Japan', flag: '🇯🇵', timezones: ['UTC+9'] }],
+    '82': [{ country: 'South Korea', flag: '🇰🇷', timezones: ['UTC+9'] }],
+    '84': [{ country: 'Vietnam', flag: '🇻🇳', timezones: ['UTC+7'] }],
+    '86': [{ country: 'China', flag: '🇨🇳', timezones: ['UTC+8'] }],
+    '90': [{ country: 'Turkey', flag: '🇹🇷', timezones: ['UTC+3'] }],
+    '91': [{ country: 'India', flag: '🇮🇳', timezones: ['UTC+5:30'] }],
+    '92': [{ country: 'Pakistan', flag: '🇵🇰', timezones: ['UTC+5'] }],
+    '93': [{ country: 'Afghanistan', flag: '🇦🇫', timezones: ['UTC+4:30'] }],
+    '94': [{ country: 'Sri Lanka', flag: '🇱🇰', timezones: ['UTC+5:30'] }],
+    '95': [{ country: 'Myanmar', flag: '🇲🇲', timezones: ['UTC+6:30'] }],
+    '98': [{ country: 'Iran', flag: '🇮🇷', timezones: ['UTC+3:30'] }],
+    '211': [{ country: 'South Sudan', flag: '🇸🇸', timezones: ['UTC+3'] }],
+    '212': [{ country: 'Morocco', flag: '🇲🇦', timezones: ['UTC+1'] }],
+    '213': [{ country: 'Algeria', flag: '🇩🇿', timezones: ['UTC+1'] }],
+    '216': [{ country: 'Tunisia', flag: '🇹🇳', timezones: ['UTC+1'] }],
+    '218': [{ country: 'Libya', flag: '🇱🇾', timezones: ['UTC+1'] }],
+    '220': [{ country: 'Gambia', flag: '🇬🇲', timezones: ['UTC+0'] }],
+    '221': [{ country: 'Senegal', flag: '🇸🇳', timezones: ['UTC+0'] }],
+    '222': [{ country: 'Mauritania', flag: '🇲🇷', timezones: ['UTC+0'] }],
+    '223': [{ country: 'Mali', flag: '🇲🇱', timezones: ['UTC+0'] }],
+    '224': [{ country: 'Guinea', flag: '🇬🇳', timezones: ['UTC+0'] }],
+    '225': [{ country: 'Ivory Coast', flag: '🇨🇮', timezones: ['UTC+0'] }],
+    '226': [{ country: 'Burkina Faso', flag: '🇧🇫', timezones: ['UTC+0'] }],
+    '227': [{ country: 'Niger', flag: '🇳🇪', timezones: ['UTC+1'] }],
+    '228': [{ country: 'Togo', flag: '🇹🇬', timezones: ['UTC+0'] }],
+    '229': [{ country: 'Benin', flag: '🇧🇯', timezones: ['UTC+1'] }],
+    '230': [{ country: 'Mauritius', flag: '🇲🇺', timezones: ['UTC+4'] }],
+    '231': [{ country: 'Liberia', flag: '🇱🇷', timezones: ['UTC+0'] }],
+    '232': [{ country: 'Sierra Leone', flag: '🇸🇱', timezones: ['UTC+0'] }],
+    '233': [{ country: 'Ghana', flag: '🇬🇭', timezones: ['UTC+0'] }],
+    '234': [{ country: 'Nigeria', flag: '🇳🇬', timezones: ['UTC+1'] }],
+    '235': [{ country: 'Chad', flag: '🇹🇩', timezones: ['UTC+1'] }],
+    '236': [{ country: 'Central African Republic', flag: '🇨🇫', timezones: ['UTC+1'] }],
+    '237': [{ country: 'Cameroon', flag: '🇨🇲', timezones: ['UTC+1'] }],
+    '238': [{ country: 'Cape Verde', flag: '🇨🇻', timezones: ['UTC-1'] }],
+    '239': [{ country: 'São Tomé and Príncipe', flag: '🇸🇹', timezones: ['UTC+0'] }],
+    '240': [{ country: 'Equatorial Guinea', flag: '🇬🇶', timezones: ['UTC+1'] }],
+    '241': [{ country: 'Gabon', flag: '🇬🇦', timezones: ['UTC+1'] }],
+    '242': [{ country: 'Congo', flag: '🇨🇬', timezones: ['UTC+1'] }],
+    '243': [{ country: 'DR Congo', flag: '🇨🇩', timezones: ['UTC+1', 'UTC+2'] }],
+    '244': [{ country: 'Angola', flag: '🇦🇴', timezones: ['UTC+1'] }],
+    '245': [{ country: 'Guinea-Bissau', flag: '🇬🇼', timezones: ['UTC+0'] }],
+    '246': [{ country: 'British Indian Ocean Territory', flag: '🇮🇴', timezones: ['UTC+6'] }],
+    '247': [{ country: 'Ascension', flag: '🇦🇨', timezones: ['UTC+0'] }],
+    '248': [{ country: 'Seychelles', flag: '🇸🇨', timezones: ['UTC+4'] }],
+    '249': [{ country: 'Sudan', flag: '🇸🇩', timezones: ['UTC+3'] }],
+    '250': [{ country: 'Rwanda', flag: '🇷🇼', timezones: ['UTC+2'] }],
+    '251': [{ country: 'Ethiopia', flag: '🇪🇹', timezones: ['UTC+3'] }],
+    '252': [{ country: 'Somalia', flag: '🇸🇴', timezones: ['UTC+3'] }],
+    '253': [{ country: 'Djibouti', flag: '🇩🇯', timezones: ['UTC+2'] }],
+    '254': [{ country: 'Kenya', flag: '🇰🇪', timezones: ['UTC+3'] }],
+    '255': [{ country: 'Tanzania', flag: '🇹🇿', timezones: ['UTC+3'] }],
+    '256': [{ country: 'Uganda', flag: '🇺🇬', timezones: ['UTC+3'] }],
+    '257': [{ country: 'Burundi', flag: '🇧🇮', timezones: ['UTC+2'] }],
+    '258': [{ country: 'Mozambique', flag: '🇲🇿', timezones: ['UTC+2'] }],
+    '260': [{ country: 'Zambia', flag: '🇿🇲', timezones: ['UTC+2'] }],
+    '261': [{ country: 'Madagascar', flag: '🇲🇬', timezones: ['UTC+3'] }],
+    '263': [{ country: 'Zimbabwe', flag: '🇿🇼', timezones: ['UTC+2'] }],
+    '264': [{ country: 'Namibia', flag: '🇳🇦', timezones: ['UTC+1'] }],
+    '265': [{ country: 'Malawi', flag: '🇲🇼', timezones: ['UTC+2'] }],
+    '266': [{ country: 'Lesotho', flag: '🇱🇸', timezones: ['UTC+2'] }],
+    '267': [{ country: 'Botswana', flag: '🇧🇼', timezones: ['UTC+2'] }],
+    '268': [{ country: 'Swaziland', flag: '🇸🇿', timezones: ['UTC+2'] }],
+    '269': [{ country: 'Comoros', flag: '🇰🇲', timezones: ['UTC+3'] }],
+    '290': [{ country: 'Saint Helena', flag: '🇸🇭', timezones: ['UTC+0'] }],
+    '291': [{ country: 'Eritrea', flag: '🇪🇷', timezones: ['UTC+3'] }],
+    '297': [{ country: 'Aruba', flag: '🇦🇼', timezones: ['UTC-4'] }],
+    '298': [{ country: 'Faroe Islands', flag: '🇫🇴', timezones: ['UTC+0'] }],
+    '299': [{ country: 'Greenland', flag: '🇬🇱', timezones: ['UTC-4', 'UTC-3', 'UTC-1', 'UTC+0'] }],
+    '350': [{ country: 'Gibraltar', flag: '🇬🇮', timezones: ['UTC+1'] }],
+    '351': [{ country: 'Portugal', flag: '🇵🇹', timezones: ['UTC+0'] }],
+    '352': [{ country: 'Luxembourg', flag: '🇱🇺', timezones: ['UTC+1'] }],
+    '353': [{ country: 'Ireland', flag: '🇮🇪', timezones: ['UTC+0'] }],
+    '354': [{ country: 'Iceland', flag: '🇮🇸', timezones: ['UTC+0'] }],
+    '355': [{ country: 'Albania', flag: '🇦🇱', timezones: ['UTC+1'] }],
+    '356': [{ country: 'Malta', flag: '🇲🇹', timezones: ['UTC+1'] }],
+    '357': [{ country: 'Cyprus', flag: '🇨🇾', timezones: ['UTC+2'] }],
+    '358': [{ country: 'Finland', flag: '🇫🇮', timezones: ['UTC+2'] }],
+    '359': [{ country: 'Bulgaria', flag: '🇧🇬', timezones: ['UTC+2'] }],
+    '370': [{ country: 'Lithuania', flag: '🇱🇹', timezones: ['UTC+2'] }],
+    '371': [{ country: 'Latvia', flag: '🇱🇻', timezones: ['UTC+2'] }],
+    '372': [{ country: 'Estonia', flag: '🇪🇪', timezones: ['UTC+2'] }],
+    '373': [{ country: 'Moldova', flag: '🇲🇩', timezones: ['UTC+2'] }],
+    '374': [{ country: 'Armenia', flag: '🇦🇲', timezones: ['UTC+4'] }],
+    '375': [{ country: 'Belarus', flag: '🇧🇾', timezones: ['UTC+3'] }],
+    '376': [{ country: 'Andorra', flag: '🇦🇩', timezones: ['UTC+1'] }],
+    '377': [{ country: 'Monaco', flag: '🇲🇨', timezones: ['UTC+1'] }],
+    '378': [{ country: 'San Marino', flag: '🇸🇲', timezones: ['UTC+1'] }],
+    '380': [{ country: 'Ukraine', flag: '🇺🇦', timezones: ['UTC+2'] }],
+    '381': [{ country: 'Serbia', flag: '🇷🇸', timezones: ['UTC+1'] }],
+    '382': [{ country: 'Montenegro', flag: '🇲🇪', timezones: ['UTC+1'] }],
+    '383': [{ country: 'Kosovo', flag: '🇽🇰', timezones: ['UTC+1'] }],
+    '385': [{ country: 'Croatia', flag: '🇭🇷', timezones: ['UTC+1'] }],
+    '386': [{ country: 'Slovenia', flag: '🇸🇮', timezones: ['UTC+1'] }],
+    '387': [{ country: 'Bosnia and Herzegovina', flag: '🇧🇦', timezones: ['UTC+1'] }],
+    '389': [{ country: 'Macedonia', flag: '🇲🇰', timezones: ['UTC+1'] }],
+    '420': [{ country: 'Czech Republic', flag: '🇨🇿', timezones: ['UTC+1'] }],
+    '421': [{ country: 'Slovakia', flag: '🇸🇰', timezones: ['UTC+1'] }],
+    '423': [{ country: 'Liechtenstein', flag: '🇱🇮', timezones: ['UTC+1'] }],
+    '500': [{ country: 'Falkland Islands', flag: '🇫🇰', timezones: ['UTC-3'] }],
+    '501': [{ country: 'Belize', flag: '🇧🇿', timezones: ['UTC-6'] }],
+    '502': [{ country: 'Guatemala', flag: '🇬🇹', timezones: ['UTC-6'] }],
+    '503': [{ country: 'El Salvador', flag: '🇸🇻', timezones: ['UTC-6'] }],
+    '504': [{ country: 'Honduras', flag: '🇭🇳', timezones: ['UTC-6'] }],
+    '505': [{ country: 'Nicaragua', flag: '🇳🇮', timezones: ['UTC-6'] }],
+    '506': [{ country: 'Costa Rica', flag: '🇨🇷', timezones: ['UTC-6'] }],
+    '507': [{ country: 'Panama', flag: '🇵🇦', timezones: ['UTC-5'] }],
+    '508': [{ country: 'Saint Pierre and Miquelon', flag: '🇵🇲', timezones: ['UTC-3'] }],
+    '509': [{ country: 'Haiti', flag: '🇭🇹', timezones: ['UTC-5'] }],
+    '590': [{ country: 'Guadeloupe', flag: '🇬🇵', timezones: ['UTC-4'] }],
+    '591': [{ country: 'Bolivia', flag: '🇧🇴', timezones: ['UTC-4'] }],
+    '592': [{ country: 'Guyana', flag: '🇬🇾', timezones: ['UTC-4'] }],
+    '593': [{ country: 'Ecuador', flag: '🇪🇨', timezones: ['UTC-6', 'UTC-5'] }],
+    '594': [{ country: 'French Guiana', flag: '🇬🇫', timezones: ['UTC-3'] }],
+    '595': [{ country: 'Paraguay', flag: '🇵🇾', timezones: ['UTC-4'] }],
+    '596': [{ country: 'Martinique', flag: '🇲🇶', timezones: ['UTC-4'] }],
+    '597': [{ country: 'Suriname', flag: '🇸🇷', timezones: ['UTC-3'] }],
+    '598': [{ country: 'Uruguay', flag: '🇺🇾', timezones: ['UTC-3'] }],
+    '599': [{ country: 'Caribbean Netherlands', flag: '🇧🇶', timezones: ['UTC-4'] }],
+    '670': [{ country: 'East Timor', flag: '🇹🇱', timezones: ['UTC+9'] }],
+    '672': [{ country: 'Australian External Territories', flag: '🇦🇶', timezones: ['UTC+10'] }],
+    '673': [{ country: 'Brunei', flag: '🇧🇳', timezones: ['UTC+8'] }],
+    '674': [{ country: 'Nauru', flag: '🇳🇷', timezones: ['UTC+12'] }],
+    '675': [{ country: 'Papua New Guinea', flag: '🇵🇬', timezones: ['UTC+10'] }],
+    '676': [{ country: 'Tonga', flag: '🇹🇴', timezones: ['UTC+13'] }],
+    '677': [{ country: 'Solomon Islands', flag: '🇸🇧', timezones: ['UTC+11'] }],
+    '678': [{ country: 'Vanuatu', flag: '🇻🇺', timezones: ['UTC+11'] }],
+    '679': [{ country: 'Fiji', flag: '🇫🇯', timezones: ['UTC+12'] }],
+    '680': [{ country: 'Palau', flag: '🇵🇼', timezones: ['UTC+9'] }],
+    '681': [{ country: 'Wallis and Futuna', flag: '🇼🇫', timezones: ['UTC+12'] }],
+    '682': [{ country: 'Cook Islands', flag: '🇨🇰', timezones: ['UTC-10'] }],
+    '683': [{ country: 'Niue', flag: '🇳🇺', timezones: ['UTC-11'] }],
+    '685': [{ country: 'Samoa', flag: '🇼🇸', timezones: ['UTC+13'] }],
+    '686': [{ country: 'Kiribati', flag: '🇰🇮', timezones: ['UTC+12', 'UTC+13', 'UTC+14'] }],
+    '687': [{ country: 'New Caledonia', flag: '🇳🇨', timezones: ['UTC+11'] }],
+    '688': [{ country: 'Tuvalu', flag: '🇹🇻', timezones: ['UTC+12'] }],
+    '689': [{ country: 'French Polynesia', flag: '🇵🇫', timezones: ['UTC-10', 'UTC-9'] }],
+    '690': [{ country: 'Tokelau', flag: '🇹🇰', timezones: ['UTC+13'] }],
+    '691': [{ country: 'Micronesia', flag: '🇫🇲', timezones: ['UTC+10', 'UTC+11'] }],
+    '692': [{ country: 'Marshall Islands', flag: '🇲🇭', timezones: ['UTC+12'] }],
+    '850': [{ country: 'North Korea', flag: '🇰🇵', timezones: ['UTC+8:30'] }],
+    '852': [{ country: 'Hong Kong', flag: '🇭🇰', timezones: ['UTC+8'] }],
+    '853': [{ country: 'Macau', flag: '🇲🇴', timezones: ['UTC+8'] }],
+    '855': [{ country: 'Cambodia', flag: '🇰🇭', timezones: ['UTC+7'] }],
+    '856': [{ country: 'Laos', flag: '🇱🇦', timezones: ['UTC+7'] }],
+    '880': [{ country: 'Bangladesh', flag: '🇧🇩', timezones: ['UTC+6'] }],
+    '886': [{ country: 'Taiwan', flag: '🇹🇼', timezones: ['UTC+8'] }],
+    '960': [{ country: 'Maldives', flag: '🇲🇻', timezones: ['UTC+5'] }],
+    '961': [{ country: 'Lebanon', flag: '🇱🇧', timezones: ['UTC+2'] }],
+    '962': [{ country: 'Jordan', flag: '🇯🇴', timezones: ['UTC+2'] }],
+    '963': [{ country: 'Syria', flag: '🇸🇾', timezones: ['UTC+2'] }],
+    '964': [{ country: 'Iraq', flag: '🇮🇶', timezones: ['UTC+3'] }],
+    '965': [{ country: 'Kuwait', flag: '🇰🇼', timezones: ['UTC+3'] }],
+    '966': [{ country: 'Saudi Arabia', flag: '🇸🇦', timezones: ['UTC+3'] }],
+    '967': [{ country: 'Yemen', flag: '🇾🇪', timezones: ['UTC+3'] }],
+    '968': [{ country: 'Oman', flag: '🇴🇲', timezones: ['UTC+4'] }],
+    '970': [{ country: 'Palestine', flag: '🇵🇸', timezones: ['UTC+2'] }],
+    '971': [{ country: 'UAE', flag: '🇦🇪', timezones: ['UTC+4'] }],
+    '972': [{ country: 'Israel', flag: '🇮🇱', timezones: ['UTC+2'] }],
+    '973': [{ country: 'Bahrain', flag: '🇧🇭', timezones: ['UTC+3'] }],
+    '974': [{ country: 'Qatar', flag: '🇶🇦', timezones: ['UTC+3'] }],
+    '975': [{ country: 'Bhutan', flag: '🇧🇹', timezones: ['UTC+6'] }],
+    '976': [{ country: 'Mongolia', flag: '🇲🇳', timezones: ['UTC+7', 'UTC+8'] }],
+    '977': [{ country: 'Nepal', flag: '🇳🇵', timezones: ['UTC+5:45'] }],
+    '992': [{ country: 'Tajikistan', flag: '🇹🇯', timezones: ['UTC+5'] }],
+    '993': [{ country: 'Turkmenistan', flag: '🇹🇲', timezones: ['UTC+5'] }],
+    '994': [{ country: 'Azerbaijan', flag: '🇦🇿', timezones: ['UTC+4'] }],
+    '995': [{ country: 'Georgia', flag: '🇬🇪', timezones: ['UTC+4'] }],
+    '996': [{ country: 'Kyrgyzstan', flag: '🇰🇬', timezones: ['UTC+5', 'UTC+6'] }],
+    '998': [{ country: 'Uzbekistan', flag: '🇺🇿', timezones: ['UTC+5'] }]
+};
 
-    phoneInput.value = '+';
-
-    function parseUTCOffset(utcString) {
-        const match = utcString.match(/UTC([+-]?)(\d+)(:(\d+))?/);
-        if (!match) return 0;
-        
-        const sign = match[1] === '-' ? -1 : 1;
-        const hours = parseInt(match[2]);
-        const minutes = match[4] ? parseInt(match[4]) / 60 : 0;
-        
-        return sign * (hours + minutes);
-    }
-
-    function getCurrentTime(utcOffset) {
-        const now = new Date();
-        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-        const localTime = new Date(utc + (3600000 * utcOffset));
-        
-        const hours = String(localTime.getHours()).padStart(2, '0');
-        const minutes = String(localTime.getMinutes()).padStart(2, '0');
-        
-        return `${hours}:${minutes}`;
-    }
-
-    function getAreaCodeTime(digits) {
-        if (digits.length >= 4) {
-            const areaCode = digits.substring(1, 4);
-            const offset = areaCodeTimezones[areaCode];
-            if (offset !== undefined) {
-                return {
-                    time: getCurrentTime(offset),
-                    timezone: offset >= 0 ? `UTC+${offset}` : `UTC${offset}`
-                };
-            }
-        }
-        return null;
-    }
-
-    function findMatchingCountries(digits) {
-        const matches = [];
-        
-        // Ищем ВСЕ коды, которые начинаются с введенных цифр
-        for (const code in phoneDatabase) {
-            if (code.startsWith(digits)) {
-                phoneDatabase[code].forEach(country => {
-                    matches.push({
-                        ...country,
-                        matchedCode: code,
-                        codeLength: code.length
-                    });
-                });
-            }
-        }
-        
-        // Сортируем по длине кода (сначала короткие)
-        matches.sort((a, b) => a.codeLength - b.codeLength);
-        
-        return matches;
-    }
-
-    function displayResults(countries, digits) {
-        if (countries.length === 0) {
-            resultsDiv.innerHTML = '';
-            errorDiv.textContent = 'Could not determine country by number';
-            errorDiv.classList.remove('hidden');
-            return;
-        }
-        
-        errorDiv.classList.add('hidden');
-        
-        let html = '';
-        countries.forEach(country => {
-            // Для США/Канады с полным номером проверяем area code
-            if (country.hasAreaCodes && digits.length >= 4 && digits.startsWith(country.matchedCode)) {
-                const areaCodeData = getAreaCodeTime(digits);
-                if (areaCodeData) {
-                    html += `
-                        <div class="result">
-                            <div class="flag">${country.flag}</div>
-                            <div class="info">
-                                <div class="country">${country.country} (+${country.matchedCode})</div>
-                                <div class="time">${areaCodeData.time}</div>
-                                <div class="timezone">${areaCodeData.timezone}</div>
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
-            }
-            
-            // Обычное отображение с показом кода страны
-            const times = country.timezones.map(tz => {
-                const offset = parseUTCOffset(tz);
-                return getCurrentTime(offset);
-            });
-            
-            const uniqueTimes = [...new Set(times)];
-            
-            html += `
-                <div class="result">
-                    <div class="flag">${country.flag}</div>
-                    <div class="info">
-                        <div class="country">${country.country} (+${country.matchedCode})</div>
-                        <div class="time">${uniqueTimes.join(' - ')}</div>
-                        <div class="timezone">${country.timezones.join(', ')}</div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        resultsDiv.innerHTML = html;
-    }
-
-    phoneInput.addEventListener('focus', function() {
-        if (phoneInput.value === '+') {
-            setTimeout(() => phoneInput.setSelectionRange(1, 1), 0);
-        }
-    });
-
-    phoneInput.addEventListener('keydown', function(e) {
-        if ((e.key === 'Backspace' || e.key === 'Delete') && phoneInput.value === '+') {
-            e.preventDefault();
-        }
-    });
-
-    phoneInput.addEventListener('input', function(e) {
-        let value = e.target.value;
-        
-        if (!value.startsWith('+')) {
-            value = '+' + value.replace(/\+/g, '');
-            phoneInput.value = value;
-        }
-        
-        const digits = value.substring(1).replace(/\D/g, '');
-        
-        if (digits.length === 0) {
-            resultsDiv.innerHTML = '';
-            errorDiv.classList.add('hidden');
-            return;
-        }
-        
-        const countries = findMatchingCountries(digits);
-        displayResults(countries, digits);
-    });
-    
-});
+// Area codes для США и Канады (оставляем как раньше)
+const areaCodeTimezones = {
+    // Eastern (UTC-5)
+    '201': -5, '202': -5, '203': -5, '207': -5, '212': -5, '215': -5, '216': -5, '234': -5, '239': -5, '240': -5,
+    '248': -5, '252': -5, '267': -5, '269': -5, '301': -5, '302': -5, '304': -5, '305': -5, '315': -5, '321': -5,
+    '330': -5, '336': -5, '347': -5, '351': -5, '352': -5, '386': -5, '401': -5, '404': -5, '407': -5, '410': -5,
+    '412': -5, '413': -5, '419': -5, '423': -5, '434': -5, '440': -5, '443': -5, '508': -5, '513': -5, '517': -5,
+    '518': -5, '561': -5, '585': -5, '586': -5, '607': -5, '614': -5, '616': -5, '617': -5, '631': -5, '646': -5,
+    '678': -5, '703': -5, '704': -5, '706': -5, '716': -5, '718': -5, '724': -5, '727': -5, '732': -5, '734': -5,
+    '740': -5, '754': -5, '757': -5, '772': -5, '774': -5, '781': -5, '786': -5, '802': -5, '803': -5, '810': -5,
+    '813': -5, '828': -5, '845': -5, '850': -5, '856': -5, '857': -5, '859': -5, '862': -5, '863': -5, '864': -5,
+    '865': -5, '878': -5, '904': -5, '908': -5, '910': -5, '912': -5, '914': -5, '917': -5, '919': -5, '929': -5,
+    '931': -5, '941': -5, '947': -5, '954': -5, '973': -5, '978': -5, '980': -5, '989': -5,
+    // Central (UTC-6)
+    '204': -6, '205': -6, '210': -6, '214': -6, '217': -6, '218': -6, '219': -6, '224': -6, '225': -6, '228': -6,
+    '251': -6, '254': -6, '256': -6, '260': -6, '262': -6, '270': -6, '281': -6, '306': -6, '309': -6, '312': -6,
+    '314': -6, '316': -6, '318': -6, '319': -6, '320': -6, '325': -6, '331': -6, '334': -6, '337': -6, '346': -6,
+    '361': -6, '402': -6, '405': -6, '409': -6, '414': -6, '417': -6, '430': -6, '432': -6, '469': -6, '478': -6,
+    '501': -6, '504': -6, '507': -6, '512': -6, '515': -6, '563': -6, '601': -6, '608': -6, '612': -6, '620': -6,
+    '630': -6, '636': -6, '641': -6, '651': -6, '660': -6, '662': -6, '682': -6, '708': -6, '712': -6, '713': -6,
+    '715': -6, '731': -6, '737': -6, '763': -6, '773': -6, '785': -6, '806': -6, '808': -6, '815': -6, '817': -6,
+    '830': -6, '832': -6, '847': -6, '870': -6, '901': -6, '903': -6, '913': -6, '918': -6, '920': -6, '936': -6,
+    '940': -6, '952': -6, '956': -6, '972': -6, '979': -6, '985': -6,
+    // Mountain (UTC-7)
+    '303': -7, '307': -7, '385': -7, '403': -7, '406': -7, '435': -7, '505': -7, '575': -7, '602': -7, '623': -7,
+    '480': -7, '520': -7, '928': -7, '719': -7, '720': -7, '970': -7,
+    // Pacific (UTC-8)
+    '206': -8, '209': -8, '213': -8, '250': -8, '253': -8, '310': -8, '323': -8, '360': -8, '408': -8, '415': -8,
+    '424': -8, '425': -8, '442': -8, '503': -8, '509': -8, '510': -8, '530': -8, '541': -8, '559': -8, '562': -8,
+    '619': -8, '626': -8, '650': -8, '657': -8, '661': -8, '669': -8, '707': -8, '714': -8, '747': -8, '760': -8,
+    '805': -8, '818': -8, '831': -8, '858': -8, '909': -8, '916': -8, '925': -8, '949': -8, '951': -8, '971': -8
+};
