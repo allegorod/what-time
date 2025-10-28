@@ -27,15 +27,54 @@ const countryFlags = {
     'ZW': '🇿🇼', 'BW': '🇧🇼', 'NA': '🇳🇦', 'MU': '🇲🇺', 'RE': '🇷🇪', 'MG': '🇲🇬'
 };
 
-const countryNames = {
-    'RU': 'Россия', 'US': 'США', 'GB': 'Великобритания', 'DE': 'Германия', 'FR': 'Франция',
-    'IT': 'Италия', 'ES': 'Испания', 'UA': 'Украина', 'BY': 'Беларусь', 'KZ': 'Казахстан',
-    'CN': 'Китай', 'JP': 'Япония', 'KR': 'Южная Корея', 'IN': 'Индия', 'BR': 'Бразилия',
-    'AU': 'Австралия', 'CA': 'Канада', 'MX': 'Мексика', 'AR': 'Аргентина', 'TR': 'Турция',
-    'SA': 'Саудовская Аравия', 'AE': 'ОАЭ', 'IL': 'Израиль', 'EG': 'Египет', 'ZA': 'ЮАР',
-    'NG': 'Нигерия', 'KE': 'Кения', 'TH': 'Таиланд', 'VN': 'Вьетнам', 'PH': 'Филиппины',
-    'ID': 'Индонезия', 'MY': 'Малайзия', 'SG': 'Сингапур', 'PL': 'Польша', 'NL': 'Нидерланды'
+    const countryNames = {
+    'RU': 'Russia', 'US': 'USA', 'GB': 'United Kingdom', 'DE': 'Germany', 'FR': 'France',
+    'IT': 'Italy', 'ES': 'Spain', 'UA': 'Ukraine', 'BY': 'Belarus', 'KZ': 'Kazakhstan',
+    'CN': 'China', 'JP': 'Japan', 'KR': 'South Korea', 'IN': 'India', 'BR': 'Brazil',
+    'AU': 'Australia', 'CA': 'Canada', 'MX': 'Mexico', 'AR': 'Argentina', 'TR': 'Turkey',
+    'SA': 'Saudi Arabia', 'AE': 'UAE', 'IL': 'Israel', 'EG': 'Egypt', 'ZA': 'South Africa',
+    'NG': 'Nigeria', 'KE': 'Kenya', 'TH': 'Thailand', 'VN': 'Vietnam', 'PH': 'Philippines',
+    'ID': 'Indonesia', 'MY': 'Malaysia', 'SG': 'Singapore', 'PL': 'Poland', 'NL': 'Netherlands'
 };
+
+const countryTimezones = {
+    'RU': ['Europe/Moscow'],
+    'US': ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'America/Anchorage', 'Pacific/Honolulu'],
+    'CA': ['America/Toronto', 'America/Vancouver', 'America/Edmonton', 'America/Winnipeg', 'America/Halifax', 'America/St_Johns'],
+    'GB': ['Europe/London'],
+    'DE': ['Europe/Berlin'],
+    'FR': ['Europe/Paris'],
+    'IT': ['Europe/Rome'],
+    'ES': ['Europe/Madrid'],
+    'UA': ['Europe/Kiev'],
+    'BY': ['Europe/Minsk'],
+    'KZ': ['Asia/Almaty'],
+    'CN': ['Asia/Shanghai'],
+    'JP': ['Asia/Tokyo'],
+    'KR': ['Asia/Seoul'],
+    'IN': ['Asia/Kolkata'],
+    'BR': ['America/Sao_Paulo'],
+    'AU': ['Australia/Sydney'],
+    'MX': ['America/Mexico_City'],
+    'AR': ['America/Argentina/Buenos_Aires'],
+    'TR': ['Europe/Istanbul'],
+    'SA': ['Asia/Riyadh'],
+    'AE': ['Asia/Dubai'],
+    'IL': ['Asia/Jerusalem'],
+    'EG': ['Africa/Cairo'],
+    'ZA': ['Africa/Johannesburg'],
+    'NG': ['Africa/Lagos'],
+    'KE': ['Africa/Nairobi'],
+    'TH': ['Asia/Bangkok'],
+    'VN': ['Asia/Ho_Chi_Minh'],
+    'PH': ['Asia/Manila'],
+    'ID': ['Asia/Jakarta'],
+    'MY': ['Asia/Kuala_Lumpur'],
+    'SG': ['Asia/Singapore'],
+    'PL': ['Europe/Warsaw'],
+    'NL': ['Europe/Amsterdam']
+};
+
 
 phoneInput.value = '+';
 
@@ -57,14 +96,14 @@ function getLocalTimeFromTimezone(tzName) {
             time: timeString,
             timezone: tzName.split('/').pop().replace(/_/g, ' ')
         };
-    } catch (e) {
-        return null;
-    }
-}
-
-phoneInput.addEventListener('focus', function() {
-    if (phoneInput.value === '+') {
-        setTimeout(() => phoneInput.setSelectionRange(1, 1), 0);
+} catch (err) {
+    if (value.length > 1) {
+        errorDiv.textContent = 'Could not determine country by number';
+        errorDiv.classList.remove('hidden');
+        result.classList.add('hidden');
+    } else {
+        errorDiv.classList.add('hidden');
+        result.classList.add('hidden');
     }
 });
 
@@ -91,30 +130,33 @@ phoneInput.addEventListener('input', function(e) {
     try {
         const phoneNumber = phoneUtil.parse(value);
         const regionCode = phoneUtil.getRegionCodeForNumber(phoneNumber);
-        
+
         if (regionCode) {
-            const flag = countryFlags[regionCode] || '🌍';
-            const country = countryNames[regionCode] || regionCode;
-            
-            // Получаем timezone - берем первую из списка
-            const timezoneData = getLocalTimeFromTimezone('Europe/Moscow'); // fallback
-            
-            flagDiv.textContent = flag;
-            countryDiv.textContent = country;
-            timeDiv.textContent = timezoneData.time;
-            timezoneDiv.textContent = timezoneData.timezone;
-            
-            result.classList.remove('hidden');
-            errorDiv.classList.add('hidden');
-        }
-    } catch (err) {
-        if (value.length > 3) {
-            errorDiv.textContent = 'Не удалось определить страну по номеру';
-            errorDiv.classList.remove('hidden');
-            result.classList.add('hidden');
-        } else {
-            errorDiv.classList.add('hidden');
-            result.classList.add('hidden');
-        }
+    const flag = countryFlags[regionCode] || '🌍';
+    const country = countryNames[regionCode] || regionCode;
+    
+    const timezones = countryTimezones[regionCode] || ['UTC'];
+    const timezoneData = getLocalTimeFromTimezone(timezones[0]);
+    
+    if (timezones.length > 1) {
+        const timeRanges = timezones.map(tz => {
+            const data = getLocalTimeFromTimezone(tz);
+            return data ? data.time : '';
+        }).filter(t => t);
+        
+        const uniqueTimes = [...new Set(timeRanges)];
+        
+        flagDiv.textContent = flag;
+        countryDiv.textContent = country;
+        timeDiv.textContent = uniqueTimes.join(' - ');
+        timezoneDiv.textContent = uniqueTimes.length > 1 ? 'Multiple timezones - enter more digits' : timezones[0].split('/').pop().replace(/_/g, ' ');
+    } else {
+        flagDiv.textContent = flag;
+        countryDiv.textContent = country;
+        timeDiv.textContent = timezoneData.time;
+        timezoneDiv.textContent = timezoneData.timezone;
     }
+    
+    result.classList.remove('hidden');
+    errorDiv.classList.add('hidden');
 });
