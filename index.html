@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Timezone Checker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Phone Timezone Checker</h1>
+        <p class="subtitle">Enter any phone number</p>
+        
+        <input type="text" id="phoneInput" placeholder="+1234567890" autocomplete="off">
+        
+        <div id="result" class="result hidden">
+            <div class="flag" id="flag"></div>
+            <div class="info">
+                <div class="country" id="country"></div>
+                <div class="time" id="time"></div>
+                <div class="timezone" id="timezone"></div>
+            </div>
+        </div>
+        
+        <div id="error" class="error hidden"></div>
+    </div>
+
+    <script src="https://unpkg.com/[email protected]/bundle/libphonenumber-max.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
