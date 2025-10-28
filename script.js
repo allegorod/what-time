@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getAreaCodeTime(digits) {
         if (digits.length >= 4) {
-            const areaCode = digits.substring(1, 4); // после кода страны 1
+            const areaCode = digits.substring(1, 4);
             const offset = areaCodeTimezones[areaCode];
             if (offset !== undefined) {
                 return {
@@ -48,18 +48,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function findMatchingCountries(digits) {
-        // Ищем точные совпадения от длинного к короткому
-        for (let len = Math.min(digits.length, 4); len > 0; len--) {
-            const code = digits.substring(0, len);
-            if (phoneDatabase[code]) {
-                return phoneDatabase[code].map(country => ({
-                    ...country,
-                    matchedCode: code
-                }));
+        const matches = [];
+        
+        // Ищем ВСЕ коды, которые начинаются с введенных цифр
+        for (const code in phoneDatabase) {
+            if (code.startsWith(digits)) {
+                phoneDatabase[code].forEach(country => {
+                    matches.push({
+                        ...country,
+                        matchedCode: code,
+                        codeLength: code.length
+                    });
+                });
             }
         }
         
-        return [];
+        // Сортируем по длине кода (сначала короткие)
+        matches.sort((a, b) => a.codeLength - b.codeLength);
+        
+        return matches;
     }
 
     function displayResults(countries, digits) {
@@ -74,15 +81,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let html = '';
         countries.forEach(country => {
-            // Для США/Канады проверяем area code
-            if (country.hasAreaCodes && digits.length >= 4) {
+            // Для США/Канады с полным номером проверяем area code
+            if (country.hasAreaCodes && digits.length >= 4 && digits.startsWith(country.matchedCode)) {
                 const areaCodeData = getAreaCodeTime(digits);
                 if (areaCodeData) {
                     html += `
                         <div class="result">
                             <div class="flag">${country.flag}</div>
                             <div class="info">
-                                <div class="country">${country.country}</div>
+                                <div class="country">${country.country} (+${country.matchedCode})</div>
                                 <div class="time">${areaCodeData.time}</div>
                                 <div class="timezone">${areaCodeData.timezone}</div>
                             </div>
@@ -92,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Обычное отображение
+            // Обычное отображение с показом кода страны
             const times = country.timezones.map(tz => {
                 const offset = parseUTCOffset(tz);
                 return getCurrentTime(offset);
@@ -104,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="result">
                     <div class="flag">${country.flag}</div>
                     <div class="info">
-                        <div class="country">${country.country}</div>
+                        <div class="country">${country.country} (+${country.matchedCode})</div>
                         <div class="time">${uniqueTimes.join(' - ')}</div>
                         <div class="timezone">${country.timezones.join(', ')}</div>
                     </div>
