@@ -7,14 +7,14 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-attachment: fixed;  /* ← ДОБАВЬ ЭТО - градиент фиксированный */
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;      /* ← ДОБАВИЛ */
-    justify-content: flex-start;  /* ← ДОБАВИЛ */
-    padding: 20px 0;          /* ← ИЗМЕНИЛ */
+    align-items: center;
+    padding: 0;  /* ← ИЗМЕНИЛ обратно на 0 */
+    margin: 0;
 }
-
 
 .container {
     background: white;
@@ -24,6 +24,7 @@ body {
     width: calc(100% - 40px);
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     margin: 20px;
+    margin-bottom: 60px;  /* ← ДОБАВЬ ЭТО - отступ снизу перед footer */
 }
 
 h1 {
@@ -132,15 +133,16 @@ h1 {
 
 /* SEO Footer */
 .seo-footer {
-    width: 100%;                    /* ← ДОБАВИЛ */
-    background: #f8f9fa;            /* ← ДОБАВИЛ */
-    padding: 40px 20px;             /* ← ИЗМЕНИЛ */
+    width: 100%;
+    background: #f8f9fa;
+    padding: 40px 20px;
     text-align: center;
-    color: #555;                    /* ← ИЗМЕНИЛ */
+    color: #555;
     font-size: 14px;
-    line-height: 1.8;               /* ← ИЗМЕНИЛ */
-    border-top: 1px solid rgba(0,0,0,0.05);  /* ← ДОБАВИЛ */
-    margin: 0;                      /* ← ДОБАВИЛ */
+    line-height: 1.8;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    margin: 0;
+    margin-top: auto;  /* ← ДОБАВЬ ЭТО - прижимает footer вниз */
 }
 
 .seo-footer h2 {
